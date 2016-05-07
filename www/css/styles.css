@@ -1,0 +1,74 @@
+
+html,body {
+	font-family: Lato, sans-serif;
+	font-size: 16px;
+	padding: 0;
+	margin: 0;
+}
+
+a {
+	text-decoration: none;
+	color: #000;
+}
+a:hover {
+	opacity: 0.6;
+}
+
+header {
+	padding: 5px 20px;
+	font-size: 20px;
+	line-height: 40px;
+	background: #ccc;
+	background: linear-gradient(to bottom, #eeeeee 0%,#cccccc 100%);
+}
+header img {
+	vertical-align: middle;
+	margin-right: 10px;
+	width: 40px;
+}
+
+header .credit {
+	float: right;
+	font-size: 14px;
+}
+
+section {
+	margin: 20px;
+}
+
+.task {
+	padding: 4px;
+	margin-bottom: 5px;
+	border-radius: 5px;
+	background: #e8e8e8;
+}
+.task.complete {
+	opacity: 0.5;
+}
+.task:hover {
+	opacity: 0.7;
+}
+.task:nth-child(odd) {
+	background: #e1eaef;
+}
+.task>span {
+	float: right;
+	margin: 0 4px;
+}
+.task>span>a {
+	display: inline-block;
+	margin-left: 4px;
+}
+
+button {
+	background: #669999;
+	border: none;
+	color: #fff;
+	font-size: 0.7em;
+	padding: 7px 10px;
+	border-radius: 5px;
+}
+button:hover {
+	cursor: pointer;
+	opacity: 0.7;
+}
