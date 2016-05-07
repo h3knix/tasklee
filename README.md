@@ -3,6 +3,8 @@ example angular php app
 
 sql/init.sql can be used to create the database
 the other sql files can be run in order to reinitialize and/or create tables and seed the database
+
+#example command to load
 cat 0* | mysql -u tasklee tasklee
 
 document root is intended to be set as the www folder
