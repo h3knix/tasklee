@@ -12,3 +12,5 @@ cat 0* | mysql -u tasklee tasklee
 document root is intended to be set as the www folder
 
 Please note that the script will operate in the server timezone and/or configured timezone for php and mysql. Using UTC would be recommended for any kind of production application.
+
+See top of index.php for configuration variables
