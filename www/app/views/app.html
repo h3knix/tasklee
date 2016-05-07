@@ -1,13 +1,15 @@
 <!doctype html>
-<html ng-app="tasklee">
+<html ng-app="taskleeApp">
 <head>
 	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>TaskLee</title>
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,300,700">
+	<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.css">
 	<link rel="stylesheet" href="css/styles.css">
 </head>
-<body ng-controller="tasks">
+<body ng-controller="tasksController">
 	
 	<header>
 		<img src="img/ninja.png" alt="">
@@ -16,20 +18,27 @@
 	</header>
 	
     <section>
-    	<div class="task">
-    		<input type="checkbox" title="mark complete">
-    		<label>A Task</label>
+    	<div ng-class="{task: true, complete:task.is_complete==1}" ng-repeat="task in tasks">
+    		<input type="checkbox" title="mark complete" value="{{task.is_complete}}" ng-checked="task.is_complete==1" ng-click="toggle_complete(task.id,task.is_complete)">
+    		<label>{{task.name}}</label>
     		<span>
-    			<a href="#" title="edit"><i class="fa fa-pencil"></i></a>
-    			<a href="#" title="remove"><i class="fa fa-remove"></i></a>
+    			<a title="remove" ng-click="delete_task(task.id)"><i class="fa fa-remove"></i></a>
     		</span>
     	</div>
     </section>
-    <section>
-    	<button type="button"><i class="fa fa-plus"></i> Add Task</button>
+    <section class="add_task">
+    	<form ng-submit="add_task()">
+	    	<input type="text" placeholder="Task Name" ng-model="taskNewName">
+	    	<button type="submit"><i class="fa fa-plus"></i> Add Task</button>
+	    </form>
     </section>
     
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-animate.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-aria.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-messages.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.js"></script>
+	
 	<script type="text/javascript" src="app/app.js"></script>
 </body>
 </html>

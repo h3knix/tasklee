@@ -51,6 +51,9 @@
 			function set_header_code($code,$str) {
 				header($_SERVER['SERVER_PROTOCOL'] .' '. $str, true, $code);
 			}
+			function set_header_bad_request() {
+				set_header_code(400,'Bad Request');
+			}
 			function set_header_server_error() {
 				set_header_code(500,'Internal Server Error');
 			}
@@ -86,17 +89,66 @@
 									}
 								break;
 								case 'post':
-									$json_ret[] = 'edit task '. $task_id;
+									$payload = json_decode(file_get_contents("php://input"));
+									if ( $payload ) {
+										if ( isset($payload->is_complete) ) {
+											$task->is_complete = ( $payload->is_complete ? 1 : 0 );
+											if ( ! $task->save() ) {
+												set_header_server_error();
+												$json_ret = array(
+													'errors' => array(
+														'failed to save',
+													),
+												);
+											}
+										}
+									} else {
+										set_header_bad_request();
+										$json_ret = array(
+											'errors' => array(
+												'invalid input format',
+											),
+										);
+									}
 								break;
 								default:
-									$json_ret = task::id($task_id);
+									$json_ret = $task;
 								break;
 							}
 						}
-					} else {//otherwise this is a task list
+					} else {
 						switch($request_method) {
-							case 'post'://if no task id and posting, then we are creating a new task
-								$json_ret[] = 'create task';
+							//if no task id and posting, then we are creating a new task
+							case 'post':
+								$payload = json_decode(file_get_contents("php://input"));
+								if ( $payload ) {
+									if ( isset($payload->name) && trim($payload->name) != '' ) {
+										$task = new task();
+										$task->name = $payload->name;
+										if ( ! $task->save() ) {
+											set_header_server_error();
+											$json_ret = array(
+												'errors' => array(
+													'failed to save',
+												),
+											);
+										}
+									} else {
+										set_header_bad_request();
+										$json_ret = array(
+											'errors' => array(
+												'task name is required',
+											),
+										);
+									}
+								} else {
+									set_header_bad_request();
+									$json_ret = array(
+										'errors' => array(
+											'invalid input format',
+										),
+									);
+								}
 							break;
 							default:
 								$task_set = task::all();

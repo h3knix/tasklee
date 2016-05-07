@@ -22,9 +22,11 @@
 		}
 		
 		public function save() {
+			$this->is_complete = ($this->is_complete ? 1 : 0);
+			
 			$this->modified = time();
 			if ( $this->id ) {
-				if ( $this->complete && ( ! $this->was_previously_completed || ! $this->completed ) ) {
+				if ( $this->is_complete && ( ! $this->was_previously_completed || ! $this->completed ) ) {
 					$this->completed = time();
 				}
 				$stmt = app::$db->prepare(
@@ -33,7 +35,7 @@
 				);
 				$stmt->bindParam(':id', $this->id);
 				$stmt->bindParam(':name', $this->name);
-				$stmt->bindParam(':is_complete', $this->is_complete ? 1 : 0);
+				$stmt->bindParam(':is_complete', $this->is_complete);
 				$stmt->bindParam(':completed', db_util::datetime_format($this->completed));
 				$stmt->bindParam(':modified', db_util::datetime_format($this->modified));
 				return $stmt->execute();
@@ -46,7 +48,7 @@
 					'insert into `task` (`name`,`is_complete`,`completed`,`created`,`modified`) values(:name,:is_complete,:completed,:created,:modified)'
 				);
 				$stmt->bindParam(':name', $this->name);
-				$stmt->bindParam(':is_complete', $this->is_complete ? 1 : 0);
+				$stmt->bindParam(':is_complete', $this->is_complete);
 				$stmt->bindParam(':completed', db_util::datetime_format($this->completed));
 				$stmt->bindParam(':created', db_util::datetime_format($this->created));
 				$stmt->bindParam(':modified', db_util::datetime_format($this->modified));
@@ -57,7 +59,7 @@
 		}
 		
 		public function delete() {
-			$stmt = app::$db->prepare('select * from task where id = :id');
+			$stmt = app::$db->prepare('delete from task where id = :id');
 			$stmt->bindParam(':id', $this->id);
 			$ret = $stmt->execute();
 			if ( $ret ) $this->id = null;

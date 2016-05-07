@@ -8,10 +8,11 @@ html,body {
 
 a {
 	text-decoration: none;
-	color: #000;
+	color: #000 !important;
 }
 a:hover {
 	opacity: 0.6;
+	cursor: pointer;
 }
 
 header {
@@ -45,6 +46,9 @@ section {
 .task.complete {
 	opacity: 0.5;
 }
+.task.complete label {
+	text-decoration: line-through;
+}
 .task:hover {
 	opacity: 0.7;
 }
@@ -60,15 +64,22 @@ section {
 	margin-left: 4px;
 }
 
+.add_task input, button {
+	font-size: 0.7em;
+	line-height: 1;
+	padding: 7px 10px;
+	border-radius: 5px;
+	border: 1px solid #669999;
+}
 button {
 	background: #669999;
 	border: none;
 	color: #fff;
-	font-size: 0.7em;
-	padding: 7px 10px;
-	border-radius: 5px;
 }
 button:hover {
 	cursor: pointer;
 	opacity: 0.7;
+}
+input:focus, button:focus {
+	outline:0;
 }
