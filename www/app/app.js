@@ -1,9 +1,5 @@
 var app = angular.module('taskleeApp', ['ngMaterial']);
 
-var complete_audio = new Audio('media/slap.mp3');
-var delete_audio = new Audio('media/snap.mp3');
-var new_audio = new Audio('media/throw.mp3');
-
 app.controller('tasksController', function($scope, $http, $mdDialog) {
 	$scope.muted = false;
 	$scope.has_audio = false;
