@@ -1,6 +1,6 @@
 <?php
 	
-	class db_util {
+	class util_db {
 		public static $date_zero = '0000-00-00';
 		public static $datetime_zero = '0000-00-00 00:00:00';
 		

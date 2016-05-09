@@ -1,11 +1,5 @@
 <?php
 	
-	//some prelim config
-	define('WEB_ROOT','/tasklee/');
-	define('DB_DSN','mysql:host=localhost;dbname=tasklee;charset=utf8');
-	define('DB_USER','tasklee');
-	define('DB_PASS','');
-	
 	//shouldnt have to change this config param
 	define('ROOT',dirname(dirname(__FILE__)) .'/');
 	
@@ -15,48 +9,27 @@
 		else throw new Exception('could not load class '. $name);
 	});
 	
+	//setup conf with default values
+	app::$conf = new conf();
 	
-	//get the route path and request method
-	$route = array();
-	preg_match('/^'. preg_quote(WEB_ROOT,'/') .'([^\?]*)/',$_SERVER['REQUEST_URI'],$route);
-	if ( is_array($route) && isset($route[1]) ) {
-		//just in case, get rid of whitespace before and after trimming forwardslash
-		$route = trim(trim(trim($route[1]),'/'));
-		$route = explode('/',$route);
-	} else $route = array();
 	
-	$request_method = '';
-	if ( isset($_POST['_method']) ) $request_method = $_POST['_method'];
-	else if ( isset($_SERVER['REQUEST_METHOD']) ) $request_method = $_SERVER['REQUEST_METHOD'];
-	$request_method = strtolower($request_method);
-	
+	//get the route path
+	$route = util_http::route_path(app::$conf->web_root);
 	
 	
 	//get the controller and do some rudimentary routing
 	$controller = array_shift($route);
 	if ( $controller ) {
 		//dont let browser cache dynamic stuff
-		header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
-		header('Cache-Control: post-check=0, pre-check=0', false);
-		header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
-		header('Pragma: no-cache');
+		util_http::set_header_nocache();
 		
 		//api is going to return json everytime
 		header('Content-Type: application/json');
 		
 		//hold our return payload
-		$json_ret = array();
+		$json_ret = new json_return();
 		
 		try {
-			function set_header_code($code,$str) {
-				header($_SERVER['SERVER_PROTOCOL'] .' '. $str, true, $code);
-			}
-			function set_header_bad_request() {
-				set_header_code(400,'Bad Request');
-			}
-			function set_header_server_error() {
-				set_header_code(500,'Internal Server Error');
-			}
 			
 			//lets database
 			app::db_connect();
@@ -70,89 +43,61 @@
 					if ( $task_id ) {
 						$task = task::id($task_id);
 						if ( ! $task ) {
-							set_header_code(404,'Not Found');
-							$json_ret = array(
-								'errors' => array(
-									'invalid task id',
-								),
-							);
+							util_http::set_header_notfound_error();
+							$json_ret->add_error('invalid task id');
 						} else {
-							switch($request_method) {
+							switch(util_http::request_method()) {
 								case 'delete':
 									if ( ! $task->delete() ) {
-										set_header_server_error();
-										$json_ret = array(
-											'errors' => array(
-												'failed to delete',
-											),
-										);
+										util_http::set_header_server_error();
+										$json_ret->add_error('failed to delete');
 									}
 								break;
 								case 'post':
-									$payload = json_decode(file_get_contents("php://input"));
+									$payload = util_http::json_input_payload();
 									if ( $payload ) {
 										if ( isset($payload->is_complete) ) {
 											$task->is_complete = ( $payload->is_complete ? 1 : 0 );
 											if ( ! $task->save() ) {
-												set_header_server_error();
-												$json_ret = array(
-													'errors' => array(
-														'failed to save',
-													),
-												);
+												util_http::set_header_server_error();
+												$json_ret->add_error('failed to save');
 											}
 										}
 									} else {
-										set_header_bad_request();
-										$json_ret = array(
-											'errors' => array(
-												'invalid input format',
-											),
-										);
+										util_http::set_header_bad_request();
+										$json_ret->add_error('invalid input format');
 									}
 								break;
 								default:
-									$json_ret = $task;
+									$json_ret->data = $task;
 								break;
 							}
 						}
 					} else {
-						switch($request_method) {
+						switch(util_http::request_method()) {
 							//if no task id and posting, then we are creating a new task
 							case 'post':
-								$payload = json_decode(file_get_contents("php://input"));
+								$payload = util_http::json_input_payload();
 								if ( $payload ) {
 									if ( isset($payload->name) && trim($payload->name) != '' ) {
 										$task = new task();
 										$task->name = $payload->name;
 										if ( ! $task->save() ) {
-											set_header_server_error();
-											$json_ret = array(
-												'errors' => array(
-													'failed to save',
-												),
-											);
+											util_http::set_header_server_error();
+											$json_ret->add_error('failed to save');
 										}
 									} else {
-										set_header_bad_request();
-										$json_ret = array(
-											'errors' => array(
-												'task name is required',
-											),
-										);
+										util_http::set_header_bad_request();
+										$json_ret->add_error('task name is required');
 									}
 								} else {
-									set_header_bad_request();
-									$json_ret = array(
-										'errors' => array(
-											'invalid input format',
-										),
-									);
+									util_http::set_header_bad_request();
+									$json_ret->add_error('invalid input format');
 								}
 							break;
 							default:
 								$task_set = task::all();
-								$json_ret = $task_set->fetchAll();
+								$json_ret->data = $task_set->fetchAll();
 							break;
 						}
 						
@@ -161,18 +106,14 @@
 			}
 		} catch(Exception $e) {
 			//some bad stuff happend
-			set_header_server_error();
+			util_http::set_header_server_error();
 			
-			//in a full production environment, we wouldn't show the exception message to the user
+			//in a production environment, we wouldn't show the exception message to the user
 			//we'd log it and tell them something else, but I wanted this here for quick debug
-			$json_ret = array(
-				'errors' => array(
-					'Exception: '. $e->getMessage(),
-				),
-			);
+			$json_ret->add_error('Exception: '. $e->getMessage());
 		}
 		
-		echo json_encode($json_ret);
+		$json_ret->output();
 	} else {
 		include ROOT . 'www/app/views/app.html';
 	}

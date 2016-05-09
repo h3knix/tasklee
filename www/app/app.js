@@ -12,10 +12,7 @@ app.controller('tasksController', function($scope, $http, $mdDialog) {
 		$http.get('task').then(function(response){
 			$scope.tasks = response.data;
 			console.log(response);
-		},function(response){
-			show_alert('An error happend');
-			console.log(data);
-		});
+		},handle_response_error);
 	};
 	function show_alert(text) {
 		$mdDialog.show(
@@ -36,20 +33,21 @@ app.controller('tasksController', function($scope, $http, $mdDialog) {
 			.cancel('No')
 		).then(after_confirm, function(){});
 	}
+	function handle_response_error(response) {
+		if ( "data" in response && response.data && "errors" in response.data ) {
+			show_alert(response.data.errors.join(', '));
+		} else {
+			show_alert('An error happend');
+		}
+		console.log(response);
+	}
 	
 	$scope.add_task = function() {
 		$http.post('task/',{"name": $scope.taskNewName}).then(function(response){
 			new_audio.play();
 			get_tasks();
-			$scope.taskNewName = "";
-		},function(response){
-			if ( response.data && "errors" in response.data ) {
-				show_alert(response.data.errors.join(', '));
-			} else {
-				show_alert('An error happend');
-			}
-			console.log(response);
-		});
+			$scope.taskNewName = '';
+		},handle_response_error);
 	};
 	
 	$scope.delete_task = function(id) {
@@ -57,10 +55,7 @@ app.controller('tasksController', function($scope, $http, $mdDialog) {
 			$http.delete('task/'+ id).then(function(data){
 				delete_audio.play();
 				get_tasks();
-			},function(response){
-				show_alert('An error happend');
-				console.log(response);
-			});
+			},handle_response_error);
 		});
 	};
 	
@@ -77,10 +72,7 @@ app.controller('tasksController', function($scope, $http, $mdDialog) {
 				new_audio.play();
 			}
 			get_tasks();
-		},function(response){
-			show_alert('An error happend');
-			console.log(response);
-		});
+		},handle_response_error);
 	};
 	
 });

@@ -16,7 +16,7 @@
 			
 			//convert datetime from db to integers
 			foreach(array('completed','created','modified') as $d) {
-				if ( ! $this->{$d} || db_util::is_datetime_zero($this->{$d}) ) $this->{$d} = 0;
+				if ( ! $this->{$d} || util_db::is_datetime_zero($this->{$d}) ) $this->{$d} = 0;
 				else $this->{$d} = strtotime($this->{$d});
 			}
 		}
@@ -30,14 +30,13 @@
 					$this->completed = time();
 				}
 				$stmt = app::$db->prepare(
-					'update `task` set `name` = :name,`is_complete` = :is_complete,`completed` = :completed,`modified` = :modified '
-					.' where id = :id'
+					'update `task` set `name` = :name,`is_complete` = :is_complete,`completed` = :completed,`modified` = :modified where id = :id'
 				);
 				$stmt->bindParam(':id', $this->id);
 				$stmt->bindParam(':name', $this->name);
 				$stmt->bindParam(':is_complete', $this->is_complete);
-				$stmt->bindParam(':completed', db_util::datetime_format($this->completed));
-				$stmt->bindParam(':modified', db_util::datetime_format($this->modified));
+				$stmt->bindParam(':completed', util_db::datetime_format($this->completed));
+				$stmt->bindParam(':modified', util_db::datetime_format($this->modified));
 				return $stmt->execute();
 			} else {
 				$this->created = time();
@@ -49,9 +48,9 @@
 				);
 				$stmt->bindParam(':name', $this->name);
 				$stmt->bindParam(':is_complete', $this->is_complete);
-				$stmt->bindParam(':completed', db_util::datetime_format($this->completed));
-				$stmt->bindParam(':created', db_util::datetime_format($this->created));
-				$stmt->bindParam(':modified', db_util::datetime_format($this->modified));
+				$stmt->bindParam(':completed', util_db::datetime_format($this->completed));
+				$stmt->bindParam(':created', util_db::datetime_format($this->created));
+				$stmt->bindParam(':modified', util_db::datetime_format($this->modified));
 				$ret = $stmt->execute();
 				if ( $ret ) $this->id = app::$db->lastInsertId();
 				return $ret;
