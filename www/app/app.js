@@ -5,13 +5,31 @@ var delete_audio = new Audio('media/snap.mp3');
 var new_audio = new Audio('media/throw.mp3');
 
 app.controller('tasksController', function($scope, $http, $mdDialog) {
+	$scope.muted = false;
+	$scope.has_audio = false;
+	
+	var audio_controller = {
+		"audios": {}
+		,"play": function(sound_name) {
+			if ( ! $scope.muted && sound_name in audio_controller.audios ) {
+				audio_controller.audios[sound_name].play();
+			}
+		}	
+	};
+	if ( Modernizr.audio ) {
+		$scope.has_audio = true;
+		audio_controller.audios = {
+			"complete": new Audio('media/slap.mp3')
+			,"delete": new Audio('media/snap.mp3')
+			,"new": new Audio('media/throw.mp3')
+		};
+	}
 	
 	get_tasks();
 	
 	function get_tasks(){
 		$http.get('task').then(function(response){
 			$scope.tasks = response.data;
-			console.log(response);
 		},handle_response_error);
 	};
 	function show_alert(text) {
@@ -44,7 +62,7 @@ app.controller('tasksController', function($scope, $http, $mdDialog) {
 	
 	$scope.add_task = function() {
 		$http.post('task/',{"name": $scope.taskNewName}).then(function(response){
-			new_audio.play();
+			audio_controller.play('new');
 			get_tasks();
 			$scope.taskNewName = '';
 		},handle_response_error);
@@ -53,7 +71,7 @@ app.controller('tasksController', function($scope, $http, $mdDialog) {
 	$scope.delete_task = function(id) {
 		show_yesno('Are you sure to delete this task?',function(){
 			$http.delete('task/'+ id).then(function(data){
-				delete_audio.play();
+				audio_controller.play('delete');
 				get_tasks();
 			},handle_response_error);
 		});
@@ -67,9 +85,9 @@ app.controller('tasksController', function($scope, $http, $mdDialog) {
 		}
 		$http.post('task/'+ id,{ "is_complete": is_complete }).then(function(response){
 			if ( is_complete ) {
-				complete_audio.play();
+				audio_controller.play('complete');
 			} else {
-				new_audio.play();
+				audio_controller.play('new');
 			}
 			get_tasks();
 		},handle_response_error);

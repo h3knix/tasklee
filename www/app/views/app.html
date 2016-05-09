@@ -14,7 +14,9 @@
 	<header>
 		<img src="img/ninja.png" alt="">
 		TaskLee
-		<span class="credit"><a href="http://seldomshort.com/">Michael Vandenberghe <i class="fa fa-external-link"></i></a></span>
+		<span class="right">
+			<a href="http://seldomshort.com/">Michael Vandenberghe <i class="fa fa-external-link"></i></a>
+		</span>
 	</header>
 	
     <section>
@@ -27,12 +29,16 @@
     	</div>
     </section>
     <section class="add_task">
+    	<span class="right" ng-show="has_audio">
+    		<a ng-class="{sound_control: true,'muted': muted}" ng-click="muted = (muted ? false : true )"><i ng-class="{fa: true,'fa-volume-up': ! muted,'fa-volume-off': muted}"></i> sound fx</a>
+    	</span>
     	<form ng-submit="add_task()">
 	    	<input type="text" placeholder="Task Name" ng-model="taskNewName">
 	    	<button type="submit"><i class="fa fa-plus"></i> Add Task</button>
 	    </form>
     </section>
     
+	<script src="js/modernizr.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-animate.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-aria.min.js"></script>
